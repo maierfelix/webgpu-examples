@@ -1,5 +1,5 @@
 # webgpu-examples
- Examples for node-webgpu
+ Examples for [node-webgpu](https://github.com/maierfelix/webgpu)
 
 # Usage
  - Clone this repository

@@ -2,8 +2,8 @@
 #extension GL_EXT_ray_tracing : enable
 #pragma shader_stage(miss)
 
-layout(location = 0) rayPayloadInEXT vec4 hitValue;
+layout(location = 0) rayPayloadInEXT vec3 payload;
 
 void main() {
-  hitValue = vec4(0.15);
+  payload = vec3(0.15);
 }

@@ -15,10 +15,7 @@ Object.assign(global, glMatrix);
     resizable: false
   });
 
-  let adapter = await GPU.requestAdapter({
-    window,
-    preferredBackend: "Vulkan"
-  });
+  let adapter = await GPU.requestAdapter({ window });
 
   let device = await adapter.requestDevice({
     extensions: ["ray_tracing"]
@@ -103,10 +100,10 @@ Object.assign(global, glMatrix);
   // which holds references to our geometry buffers
   let geometryContainer = device.createRayTracingAccelerationContainer({
     level: "bottom",
-    flags: GPURayTracingAccelerationContainerFlag.PREFER_FAST_TRACE,
+    usage: GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
     geometries: [
       {
-        flags: GPURayTracingAccelerationGeometryFlag.OPAQUE,
+        usage: GPURayTracingAccelerationGeometryUsage.OPAQUE,
         type: "triangles",
         vertex: {
           buffer: triangleVertexBuffer,
@@ -128,10 +125,10 @@ Object.assign(global, glMatrix);
   // and links to a geometry container to be used
   let instanceContainer = device.createRayTracingAccelerationContainer({
     level: "top",
-    flags: GPURayTracingAccelerationContainerFlag.PREFER_FAST_TRACE,
+    usage: GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
     instances: [
       {
-        flags: GPURayTracingAccelerationInstanceFlag.TRIANGLE_CULL_DISABLE,
+        usage: GPURayTracingAccelerationInstanceUsage.TRIANGLE_CULL_DISABLE,
         mask: 0xFF,
         instanceId: 0,
         instanceOffset: 0x0,
@@ -282,7 +279,8 @@ Object.assign(global, glMatrix);
     }),
     rayTracingState: {
       shaderBindingTable,
-      maxRecursionDepth: 1
+      maxRecursionDepth: 1,
+      maxPayloadSize: 3 * Float32Array.BYTES_PER_ELEMENT
     }
   });
 

@@ -42,12 +42,13 @@ const blitFsSrc = `
   #pragma shader_stage(fragment)
   layout (location = 0) in vec2 vUv;
   layout (location = 0) out vec4 outColor;
-  layout (binding = 0) uniform sampler2D renderTarget1;
-  layout (binding = 1) uniform sampler2D renderTarget2;
+  layout (binding = 0) uniform sampler sampler0;
+  layout (binding = 1) uniform texture2D renderTarget1;
+  layout (binding = 2) uniform texture2D renderTarget2;
   void main() {
     outColor = mix(
-      texture(renderTarget1, vUv),
-      texture(renderTarget2, vUv),
+      texture(sampler2D(renderTarget1, sampler0), vUv),
+      texture(sampler2D(renderTarget2, sampler0), vUv),
       vUv.x
     );
   }
@@ -113,6 +114,14 @@ const blitFsSrc = `
     ]
   });
 
+  const linearSampler = device.createSampler({
+    magFilter: "linear",
+    minFilter: "linear",
+    addressModeU: "repeat",
+    addressModeV: "repeat",
+    addressModeW: "repeat"
+  });
+
   const renderTarget1 = device.createTexture({
     size: {
       width: window.width,
@@ -148,15 +157,20 @@ const blitFsSrc = `
   });
 
   const blitBindGroupLayout = device.createBindGroupLayout({
-    // 2 texture inputs
+    // 1 sampler, 2 texture inputs
     entries: [
       {
         binding: 0,
         visibility: GPUShaderStage.FRAGMENT,
-        type: "sampled-texture"
+        type: "sampler"
       },
       {
         binding: 1,
+        visibility: GPUShaderStage.FRAGMENT,
+        type: "sampled-texture"
+      },
+      {
+        binding: 2,
         visibility: GPUShaderStage.FRAGMENT,
         type: "sampled-texture"
       }
@@ -165,17 +179,22 @@ const blitFsSrc = `
 
   const blitBindGroup = device.createBindGroup({
     layout: blitBindGroupLayout,
-    // 2 texture inputs
+    // 1 sampler, 2 texture inputs
     entries: [
       {
         binding: 0,
-        textureView: renderTargetView1,
+        sampler: linearSampler,
         size: 0
       },
       {
         binding: 1,
-        textureView: renderTargetView2,
+        textureView: renderTargetView1,
         size: 0
+      },
+      {
+        binding: 2,
+        textureView: renderTargetView2,
+        size: 2
       }
     ]
   });

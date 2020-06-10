@@ -40,9 +40,10 @@ const blitFsSrc = `
   #pragma shader_stage(fragment)
   layout (location = 0) in vec2 vUv;
   layout (location = 0) out vec4 outColor;
-  layout (binding = 0) uniform sampler2D texture0;
+  layout (binding = 0) uniform sampler sampler0;
+  layout (binding = 1) uniform texture2D texture1;
   void main() {
-    outColor = texture(texture0, vUv);
+    outColor = texture(sampler2D(texture1, sampler0), vUv);
   }
 `;
 
@@ -98,6 +99,14 @@ const blitFsSrc = `
     }]
   });
 
+  const linearSampler = device.createSampler({
+    magFilter: "linear",
+    minFilter: "linear",
+    addressModeU: "repeat",
+    addressModeV: "repeat",
+    addressModeW: "repeat"
+  });
+
   const blitTexture = device.createTexture({
     size: {
       width: window.width,
@@ -117,20 +126,34 @@ const blitFsSrc = `
   });
 
   const blitBindGroupLayout = device.createBindGroupLayout({
-    entries: [{
-      binding: 0,
-      visibility: GPUShaderStage.FRAGMENT,
-      type: "sampled-texture"
-    }]
+    entries: [
+      {
+        binding: 0,
+        visibility: GPUShaderStage.FRAGMENT,
+        type: "sampler"
+      },
+      {
+        binding: 1,
+        visibility: GPUShaderStage.FRAGMENT,
+        type: "sampled-texture"
+      }
+    ]
   });
 
   const blitBindGroup = device.createBindGroup({
     layout: blitBindGroupLayout,
-    entries: [{
-      binding: 0,
-      textureView: blitTextureView,
-      size: 0
-    }]
+    entries: [
+      {
+        binding: 0,
+        sampler: linearSampler,
+        size: 0
+      },
+      {
+        binding: 1,
+        textureView: blitTextureView,
+        size: 0
+      }
+    ]
   });
 
   const blitPipeline = device.createRenderPipeline({
